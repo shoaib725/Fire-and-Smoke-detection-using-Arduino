@@ -1,0 +1,55 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+// Define pin numbers
+#define smokeSensor A0       // MQ-2 smoke sensor connected to A0
+#define buzzerPin 8          // Buzzer connected to pin 8
+#define flameSensor 9        // Flame sensor connected to pin 9 (digital)
+
+// LCD configuration
+LiquidCrystal_I2C lcd(0x27, 16, 2); // I2C address 0x27 for 16x2 LCD
+
+void setup() {
+  // Initialize the buzzer pin as an output
+  pinMode(buzzerPin, OUTPUT);
+  
+  // Initialize the flame sensor pin as an input
+  pinMode(flameSensor, INPUT);
+  
+  // Initialize the LCD
+  lcd.begin(16, 2);
+  lcd.print("Smoke & Fire");
+  delay(2000);  // Wait for 2 seconds to display the title
+  
+  // Print initial message on the LCD
+  lcd.clear();
+  lcd.print("System Starting...");
+  delay(1000);
+}
+
+void loop() {
+  // Read the smoke sensor value (analog)
+  int smokeLevel = analogRead(smokeSensor);
+  int flameDetected = digitalRead(flameSensor);  // Read the flame sensor (digital)
+
+  lcd.clear();
+  
+  // Check if smoke is detected
+  if (smokeLevel > 1000) {  // Adjust threshold value for the MQ-2 sensor
+    lcd.print("Smoke Detected!");
+    digitalWrite(buzzerPin, HIGH); // Turn on the buzzer
+    delay(20);  // Delay to keep the alarm on for a short while
+  }
+  // Check if fire is detected
+  else if (flameDetected == HIGH) {  // Flame sensor HIGH means fire detected
+    lcd.print("Fire Detected!");
+    digitalWrite(buzzerPin, HIGH); // Turn on the buzzer
+    delay(20);  // Delay to keep the alarm on for a short while
+  }
+  else {
+    lcd.print("No Smoke or Fire");
+    digitalWrite(buzzerPin, LOW); // Turn off the buzzer
+  }
+  
+  delay(1000);  // Wait for 1 second before the next reading
+}
